@@ -27,5 +27,18 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'golden'
+    }
+}
+
+// Run with: ./gradlew :NextiaBS:goldenTest -Dtest.golden.dir=<path>
+// Regenerate with: ./gradlew :NextiaBS:goldenTest -Dtest.golden.dir=<path> -Dupdate.golden=true
+tasks.register('goldenTest', Test) {
+    useJUnitPlatform {
+        includeTags 'golden'
+    }
+    systemProperties = System.properties.subMap(['test.golden.dir', 'update.golden'])
+    description = 'Run golden-fixture regression tests for NextiaBS'
+    group = 'verification'
 }

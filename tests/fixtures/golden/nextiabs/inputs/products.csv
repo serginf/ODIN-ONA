@@ -1,0 +1,6 @@
+product_id,product_name,category,price,stock_quantity
+101,Laptop,Electronics,999.99,50
+102,Desk Chair,Furniture,249.50,120
+103,Notebook,Stationery,4.99,500
+104,Monitor,Electronics,399.00,75
+105,Keyboard,Electronics,79.95,200

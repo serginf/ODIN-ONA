@@ -1,0 +1,6 @@
+order_id,customer_id,product_id,quantity,order_date,status
+5001,1,101,1,2024-01-10,shipped
+5002,2,103,3,2024-01-11,pending
+5003,1,104,2,2024-01-12,delivered
+5004,3,102,1,2024-01-13,shipped
+5005,4,101,1,2024-01-14,pending

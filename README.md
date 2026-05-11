@@ -37,6 +37,42 @@
 
 Welcome to ODIN! This documentation is designed to help new developers quickly get started with the project and understand its architecture, dependencies, and configuration.
 
+## Fresh-clone verification <a name="fresh-clone"></a>
+
+This is the canonical procedure to verify any phase of the refactor on a clean machine.
+Run it before declaring a phase complete.
+
+**Prerequisites:** Docker, JDK 11 (Temurin), Make.
+
+```bash
+# 1. Clone to a fresh directory
+git clone <repo-url> odin-verify
+cd odin-verify
+
+# 2. Start the full stack
+docker compose up -d --build
+# Wait ~60 s for all services to be healthy
+
+# 3. Build and unit tests (including ArchUnit)
+cd backend
+./gradlew build
+cd ..
+
+# 4. Golden-fixture regression tests
+#    First time: generate golden files
+make test-golden-update
+#    Subsequent runs: compare only
+make test-golden
+
+# 5. Manual demo flow
+#    Open http://localhost:9000 in a browser
+#    Create a project → upload tests/fixtures/golden/nextiabs/inputs/employees.csv
+#    Run: Bootstrap → Discovery → Integration
+#    Confirm the integrated graph is visualised correctly
+```
+
+If any step fails the phase is not done — fix it before merging.
+
 ## Executing ODIN <a name="executing"></a>
 
 ### Docker <a name="docker"></a>
