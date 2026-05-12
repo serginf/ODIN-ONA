@@ -11,6 +11,8 @@ import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreInterface;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreJenaImpl;
 import edu.upc.essi.dtim.odin.storage.ProjectRepository;
 import edu.upc.essi.dtim.odin.config.AppConfig;
+import edu.upc.essi.dtim.odin.config.EventLogService;
+import edu.upc.essi.dtim.odin.config.TenantContext;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerInterface;
@@ -34,6 +36,8 @@ public class ProjectService {
     private ProjectRepository projectRepository;
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private EventLogService eventLog;
 
     // ---------------- CRUD/ORM operations
 
@@ -47,6 +51,8 @@ public class ProjectService {
         // For some reason, ormProject.save(project) does not store the global graph of the integrated graphs, so if we
         // want to obtain it, we need to execute the function getProject(), which regenerates the global graphs
         Project savedProject = projectRepository.save(project); // Save the project using the ORM store
+        eventLog.append(TenantContext.getCurrentTenant(), "system", "PROJECT_SAVED",
+                "{\"projectId\":\"" + savedProject.getProjectId() + "\"}");
 
         // Check if the project has an integrated and/or temporal integrated graph. If that is the case, set the name
         // of the RDF file (the number) as the project's graph name, so we can access it later.
@@ -165,6 +171,8 @@ public class ProjectService {
             }
         }
         projectRepository.delete(id);
+        eventLog.append(TenantContext.getCurrentTenant(), "system", "PROJECT_DELETED",
+                "{\"projectId\":\"" + id + "\"}");
     }
 
     // ---------------- Other operations

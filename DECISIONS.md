@@ -257,10 +257,26 @@ The transient `temporalIntegratedGraph` field on `Project` (used during the inte
 ### ArchUnit Phase 1 rules deferred
 The plan calls for ArchUnit assertions on `@Version` and `Instant` field types. Because entities use XML mapping (`orm.xml`) rather than `@Entity` annotations, standard ArchUnit field-annotation rules do not apply. These assertions need a custom ArchUnit rule that reads orm.xml metadata — deferred to when the entity layer is next touched.
 
-### Phase 1 build status (2026-05-12)
-All services migrated from `ORMStoreFactory` to per-aggregate repositories. `ORMStoreInterface`, `ORMStoreJpaImpl`, and `ORMStoreFactory` deleted. `./gradlew :api:build` passes clean. Still pending from the full Phase 1 plan:
+### `GraphRepository` tenant filtering (2026-05-12)
+`GraphRepository.findLocalGraph/findIntegratedGraph/findWorkflowGraph` originally used `em.find()` which returns any entity by PK regardless of tenant. Fixed: each find method now checks that the returned entity's `tenantId` matches `TenantContext.getCurrentTenant()` — returning `null` on mismatch. `save` now stamps the current tenant; `delete` guards against cross-tenant removal. Unit tests in `GraphRepositoryTest` verify all three cases.
+
+### EventLogService wired (2026-05-12)
+`EventLogService` was created in Phase 1 infra but never called. Wired into:
+- `ProjectService.saveProject` → `PROJECT_SAVED` event
+- `ProjectService.deleteProject` → `PROJECT_DELETED` event
+- `DatasetService.saveDataset` → `DATASET_SAVED` event
+
+### `ddl-auto=update` is intentional for Phase 1, not Phase-1-complete (2026-05-12)
+Flyway manages only the `events` table. The JPA entity tables (Project, Dataset, Graph, etc.) are managed by Hibernate `ddl-auto=update`. This is an explicit, temporary decision for Phase 1: no production data exists, the schema is still evolving, and writing Flyway migrations for 20+ tables before the schema stabilises would create churn. A Flyway baseline migration for all JPA tables is a Phase 1.5 exit criterion, before any production deployment.
+
+### Unbounded `ProjectRepository.findAll()` (2026-05-12)
+`ProjectRepository.findAll()` returns `List<Project>` filtered by tenant (JPQL `WHERE tenant_id = :t`). A paginated overload `findAll(int offset, int limit)` also exists. The issue is not a security gap — cross-tenant data cannot leak. It is a scale concern. For the current research/demo context (< 100 projects per tenant) this is acceptable. Wiring pagination into the controller is deferred to Phase 1.5 and tracked in Phase 1 plan item: "Every repository read method returns either `Optional<T>` or `Page<T>` — never unbounded `List<T>`."
+
+### Phase 1 build status — post-review closure (2026-05-12)
+14/14 tenant isolation unit tests pass (`ProjectRepositoryTest` 7/7, `GraphRepositoryTest` 7/7). `./gradlew :api:build` passes clean. Still pending from the full Phase 1 plan:
 - Project entity cleanup: `IntegrationDraft` entity, replace embedded graphs with IDs, replace embedded list fields with repo queries
-- Tenant isolation test and paginated `findAll` wired into controllers
+- Paginated `findAll` wired into controllers (scale concern, not a security gap)
+- Flyway baseline migration for JPA tables (Phase 1.5 exit criterion)
 
 ---
 

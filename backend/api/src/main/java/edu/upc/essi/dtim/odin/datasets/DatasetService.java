@@ -64,6 +64,8 @@ public class DatasetService {
     private RestTemplate restTemplate;
     @Autowired
     private DatasetRepository datasetRepository;
+    @Autowired
+    private edu.upc.essi.dtim.odin.config.EventLogService eventLog;
 
     // ---------------- POST Operation
 
@@ -402,7 +404,10 @@ public class DatasetService {
      * @return The saved Dataset object.
      */
     public Dataset saveDataset(Dataset dataset) {
-        return datasetRepository.save(dataset);
+        Dataset saved = datasetRepository.save(dataset);
+        eventLog.append(edu.upc.essi.dtim.odin.config.TenantContext.getCurrentTenant(), "system", "DATASET_SAVED",
+                "{\"datasetId\":\"" + saved.getId() + "\"}");
+        return saved;
     }
 
     /**
