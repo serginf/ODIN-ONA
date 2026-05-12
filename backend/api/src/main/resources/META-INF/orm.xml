@@ -68,12 +68,10 @@
                 </cascade>
             </one-to-one>
 
-            <one-to-one name="temporalIntegratedGraph"
-                        target-entity="edu.upc.essi.dtim.NextiaCore.graph.jena.IntegratedGraphJenaImpl">
-                <cascade>
-                    <cascade-all/>
-                </cascade>
-            </one-to-one>
+            <transient name="temporalIntegratedGraph"/>
+            <basic name="temporalIntegratedGraphName">
+                <column name="temporal_integrated_graph_name"/>
+            </basic>
 
             <one-to-many orphan-removal="true" name="dataProducts"
                          target-entity="edu.upc.essi.dtim.NextiaCore.queries.DataProduct">
@@ -317,6 +315,18 @@
                     <cascade-all/>
                 </cascade>
             </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="edu.upc.essi.dtim.odin.integration.IntegrationDraft">
+        <table name="IntegrationDraft"/>
+        <attributes>
+            <id name="projectId"/>
+            <basic name="temporalIntegratedGraphName"/>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
         </attributes>
     </entity>
 

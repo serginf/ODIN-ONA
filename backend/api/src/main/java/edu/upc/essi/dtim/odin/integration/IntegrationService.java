@@ -9,6 +9,8 @@ import edu.upc.essi.dtim.NextiaCore.graph.jena.IntegratedGraphJenaImpl;
 import edu.upc.essi.dtim.NextiaCore.graph.jena.LocalGraphJenaImpl;
 import edu.upc.essi.dtim.odin.exception.EmptyFileException;
 import edu.upc.essi.dtim.odin.integration.pojos.IntegrationTemporalResponse;
+import edu.upc.essi.dtim.odin.storage.GraphRepository;
+import edu.upc.essi.dtim.odin.storage.IntegrationDraftRepository;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.NextiaGraphy.nextiaGraphyModuleImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.NextiaGraphy.nextiaGraphyModuleInterface;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreFactory;
@@ -41,6 +43,10 @@ public class IntegrationService {
     private DatasetService datasetService;
     @Autowired
     private AppConfig appConfig;
+    @Autowired
+    private GraphRepository graphRepository;
+    @Autowired
+    private IntegrationDraftRepository integrationDraftRepository;
 
     /**
      * STEP 0 OF THE INTEGRATION (OPTIONAL)
@@ -145,15 +151,28 @@ public class IntegrationService {
      * @return The project with the new temporal integrated graph.
      */
     public Project updateTemporalIntegratedGraphProject(Project project, Graph integratedGraph) {
-        // Create an integrated graph and assign the data from the new integrated graph
-        // NECESSARY DUE TO CASTING STUFF
         IntegratedGraphJenaImpl integratedImpl = CoreGraphFactory.createIntegratedGraph();
         integratedImpl.setGraph(integratedGraph.getGraph());
+        integratedImpl.setGraphicalSchema(integratedGraph.getGraphicalSchema());
 
-        // Set the integrated graph in the project.
-        project.setTemporalIntegratedGraph(integratedImpl);
-        project.getTemporalIntegratedGraph().setGraphicalSchema(integratedGraph.getGraphicalSchema());
+        // Persist to JPA (generates the graphName) then save the Jena model under that name
+        IntegratedGraphJenaImpl saved = graphRepository.save(integratedImpl);
+        try {
+            GraphStoreInterface graphStoreInterface = GraphStoreFactory.getInstance(appConfig);
+            graphStoreInterface.saveGraph(saved);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
+        // Upsert the draft so the temporal state survives restarts
+        IntegrationDraft draft = integrationDraftRepository
+                .findByProjectId(project.getProjectId())
+                .orElse(new IntegrationDraft(project.getProjectId(), null));
+        draft.setTemporalIntegratedGraphName(saved.getGraphName());
+        integrationDraftRepository.save(draft);
+
+        project.setTemporalIntegratedGraphName(saved.getGraphName());
+        project.setTemporalIntegratedGraph(saved);
         return project;
     }
 
@@ -301,10 +320,15 @@ public class IntegrationService {
     public Project acceptIntegration(String projectID) {
         Project temporalProject = projectService.getProject(projectID);
 
-        // Set the temporal integrated graph as the integrated graph
+        // Promote the temporal graph to the permanent integrated graph
         Project projectToSave = updateIntegratedGraphProject(temporalProject, temporalProject.getTemporalIntegratedGraph());
 
-        // Pass the newly integrated dataset from the temporalIntegratedDatasets to integratedDatasets and reset temporalIntegratedDatasets
+        // Clear temporal state
+        projectToSave.setTemporalIntegratedGraphName(null);
+        projectToSave.setTemporalIntegratedGraph(null);
+        integrationDraftRepository.deleteByProjectId(projectID);
+
+        // Pass the newly integrated dataset from temporalIntegratedDatasets to integratedDatasets
         List<Dataset> temporalIntegratedDatasets = projectToSave.getTemporalIntegratedDatasets();
         String lastDatasetIdAdded = temporalIntegratedDatasets.get(temporalIntegratedDatasets.size()-1).getId();
         projectToSave = datasetService.addIntegratedDataset(projectToSave, lastDatasetIdAdded);

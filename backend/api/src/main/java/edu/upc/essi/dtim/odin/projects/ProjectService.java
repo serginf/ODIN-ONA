@@ -68,17 +68,6 @@ public class ProjectService {
             }
         }
 
-        if (savedProject.getTemporalIntegratedGraph() != null && savedProject.getTemporalIntegratedGraph().getGraphName() != null) {
-            try {
-                GraphStoreInterface graphStoreInterface = GraphStoreFactory.getInstance(appConfig);
-                Graph graph = project.getTemporalIntegratedGraph();
-                // Set the graph name to match the saved project's temporal integrated graph name
-                graph.setGraphName(savedProject.getTemporalIntegratedGraph().getGraphName() == null ? "noName" : savedProject.getTemporalIntegratedGraph().getGraphName());
-                graphStoreInterface.saveGraph(graph);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
         return savedProject;
     }
 
@@ -104,12 +93,10 @@ public class ProjectService {
                 Graph integratedGraph = graphStoreInterface.getGraph(project.getIntegratedGraph().getGraphName());
                 project.setIntegratedGraph((IntegratedGraphJenaImpl) integratedGraph);
             }
-            if (project.getTemporalIntegratedGraph() != null) {
+            if (project.getTemporalIntegratedGraphName() != null) {
                 GraphStoreInterface graphStoreInterface = GraphStoreFactory.getInstance(appConfig);
-
-                // Retrieve the integrated temporal graph by its graph name and cast it to IntegratedGraphJenaImpl
-                Graph integratedGraph = graphStoreInterface.getGraph(project.getTemporalIntegratedGraph().getGraphName());
-                project.setTemporalIntegratedGraph((IntegratedGraphJenaImpl) integratedGraph);
+                Graph temporalGraph = graphStoreInterface.getGraph(project.getTemporalIntegratedGraphName());
+                project.setTemporalIntegratedGraph((IntegratedGraphJenaImpl) temporalGraph);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

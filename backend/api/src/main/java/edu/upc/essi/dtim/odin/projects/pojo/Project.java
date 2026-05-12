@@ -17,6 +17,7 @@ public class Project {
     private String createdBy;
     private String tenantId;
     private Long version;
+    private String temporalIntegratedGraphName;
     private List<DataRepository> repositories;
     private IntegratedGraphJenaImpl integratedGraph;
     private IntegratedGraphJenaImpl temporalIntegratedGraph;
@@ -74,6 +75,11 @@ public class Project {
 
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
+
+    public String getTemporalIntegratedGraphName() { return temporalIntegratedGraphName; }
+    public void setTemporalIntegratedGraphName(String temporalIntegratedGraphName) {
+        this.temporalIntegratedGraphName = temporalIntegratedGraphName;
+    }
 
     public IntegratedGraphJenaImpl getIntegratedGraph() {
         return integratedGraph;
