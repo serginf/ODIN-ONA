@@ -15,6 +15,8 @@ public class Project {
     private String projectPrivacy;
     private String projectColor;
     private String createdBy;
+    private String tenantId;
+    private Long version;
     private List<DataRepository> repositories;
     private IntegratedGraphJenaImpl integratedGraph;
     private IntegratedGraphJenaImpl temporalIntegratedGraph;
@@ -66,6 +68,12 @@ public class Project {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
+    public String getTenantId() { return tenantId; }
+    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 
     public IntegratedGraphJenaImpl getIntegratedGraph() {
         return integratedGraph;

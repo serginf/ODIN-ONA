@@ -235,6 +235,35 @@ Today, `backend/api/src/main/java/edu/upc/essi/dtim/odin/projects/pojo/Project.j
 
 ---
 
+## Phase 1 — Decisions made during implementation (2026-05-12)
+
+### String IDs kept
+All entity identifiers remain `String` (not migrated to `UUID`). The entities predated this refactor and the IDs carry no production data, so the risk of the change was not worth the benefit. Decision: keep as-is until Phase 3 constructor-wires everything and the cost of migrating IDs drops to near zero.
+
+### IntegrationDraft: Option A (persisted entity)
+The transient `temporalIntegratedGraph` field on `Project` (used during the integration workflow) was confirmed to use **Option A** — a persisted `IntegrationDraft` entity with an FK back to `Project`. Rationale: the demo survives a restart without losing in-progress integration state; the in-memory cache (Option B) would lose work on every redeploy, which is frequent during development.
+
+`IntegrationDraft` creation is deferred to Phase 1 entity cleanup (still pending — see checkpoint).
+
+### orm.xml and `ddl-auto=update`
+`META-INF/orm.xml` is auto-loaded by the JPA spec; no `persistence.xml` is needed. `ddl-auto=update` is intentional for dev (no production data to protect, schema evolves freely). Flyway manages only the `events` table (a non-JPA table introduced in this phase).
+
+### `GraphStoreFactory` wiring fix
+`GraphStoreFactory` previously instantiated `GraphStoreJenaImpl` with `new` (bypassing Spring), meaning the Jena impl was created twice — once by Spring (with DI) and once by the factory (without). Fixed by adding a Spring constructor to `GraphStoreFactory` that captures the Spring-managed `GraphStoreJenaImpl` bean in a static field. The static `getInstance(AppConfig)` signature is preserved for callers.
+
+### `Query` entity not persistable
+`NextiaCore.queries.Query` is a plain POJO with no JPA annotations and is absent from `orm.xml`. Both `QueryService.getQueryByID` and `saveQuery` were already TODO-only and have never worked. Replaced their bodies with `UnsupportedOperationException`. The Query flow is tracked as a known gap until Phase 2's query rewriting rework.
+
+### ArchUnit Phase 1 rules deferred
+The plan calls for ArchUnit assertions on `@Version` and `Instant` field types. Because entities use XML mapping (`orm.xml`) rather than `@Entity` annotations, standard ArchUnit field-annotation rules do not apply. These assertions need a custom ArchUnit rule that reads orm.xml metadata — deferred to when the entity layer is next touched.
+
+### Phase 1 build status (2026-05-12)
+All services migrated from `ORMStoreFactory` to per-aggregate repositories. `ORMStoreInterface`, `ORMStoreJpaImpl`, and `ORMStoreFactory` deleted. `./gradlew :api:build` passes clean. Still pending from the full Phase 1 plan:
+- Project entity cleanup: `IntegrationDraft` entity, replace embedded graphs with IDs, replace embedded list fields with repo queries
+- Tenant isolation test and paginated `findAll` wired into controllers
+
+---
+
 ## Phase 1.5 — Collapse `NextiaCore.graph` to a single concrete class
 
 **Goal:** Replace the 15-file `Graph` / `IntegratedGraph` / `LocalGraph` / `GlobalGraph` / `WorkflowGraph` / `MappingsGraph` hierarchy (with one Jena impl per subtype) with a single concrete `RdfGraph` class + a `Kind` enum + small composition records for subtypes that carry extra state. This is a precondition for Phase 2 — the new persistence layer is much cleaner against `RdfGraph` than against the existing hierarchy.

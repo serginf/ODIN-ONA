@@ -16,6 +16,8 @@ import java.util.*;
 public class GraphJenaImpl implements Graph {
 	private String graphName; // e.g. "http://example/"+ UUID.randomUUID().toString();
 	private String graphicalSchema;
+	private String tenantId;
+	private Long version;
 	@JsonIgnore
 	private Model graph;
 
@@ -40,6 +42,12 @@ public class GraphJenaImpl implements Graph {
 	public void setGraphicalSchema(String graphicalSchema) {
 		this.graphicalSchema = graphicalSchema;
 	}
+
+	public String getTenantId() { return tenantId; }
+	public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+
+	public Long getVersion() { return version; }
+	public void setVersion(Long version) { this.version = version; }
 
 	public Model getGraph() {
 		return graph;

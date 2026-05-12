@@ -32,8 +32,6 @@ import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerInterface;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreFactory;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreInterface;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
 import edu.upc.essi.dtim.odin.projects.ProjectService;
 import edu.upc.essi.dtim.odin.projects.pojo.Project;
 import edu.upc.essi.dtim.odin.repositories.RepositoryService;

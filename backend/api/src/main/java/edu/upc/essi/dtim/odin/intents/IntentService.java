@@ -2,9 +2,8 @@ package edu.upc.essi.dtim.odin.intents;
 
 import edu.upc.essi.dtim.NextiaCore.queries.DataProduct;
 import edu.upc.essi.dtim.NextiaCore.queries.Intent;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
 import edu.upc.essi.dtim.odin.dataProducts.DataProductService;
+import edu.upc.essi.dtim.odin.storage.IntentRepository;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.projects.ProjectService;
 import edu.upc.essi.dtim.odin.projects.pojo.Project;
@@ -21,7 +20,8 @@ public class IntentService {
     private DataProductService dataProductService;
     @Autowired
     private ProjectService projectService;
-    private final ORMStoreInterface ormDataResource = ORMStoreFactory.getInstance();
+    @Autowired
+    private IntentRepository intentRepository;
 
     // ---------------- CRUD/ORM operations
 
@@ -31,7 +31,7 @@ public class IntentService {
      * @param intent The Intent object to save.
      * @return The saved Intent object.
      */
-    public Intent saveIntent(Intent intent) { return ormDataResource.save(intent); }
+    public Intent saveIntent(Intent intent) { return intentRepository.save(intent); }
 
     /**
      * Retrieves an intent by its unique identifier
@@ -40,7 +40,7 @@ public class IntentService {
      * @return The intent object.
      */
     public Intent getIntent(String intentID) {
-        Intent intent = ormDataResource.findById(Intent.class, intentID);
+        Intent intent = intentRepository.findById(intentID).orElse(null);
         if (intent == null) {
             throw new ElementNotFoundException("Intent not found with ID: " + intentID);
         }

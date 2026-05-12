@@ -3,7 +3,6 @@ package edu.upc.essi.dtim.NextiaCore.datasets;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import edu.upc.essi.dtim.NextiaCore.graph.LocalGraph;
 import edu.upc.essi.dtim.NextiaCore.repositories.DataRepository;
-import edu.upc.essi.dtim.NextiaCore.graph.jena.LocalGraphJenaImpl;
 import edu.upc.essi.dtim.NextiaCore.discovery.Attribute;
 
 import java.sql.Timestamp;
@@ -15,6 +14,8 @@ public class Dataset {
 	private String datasetName;
 	private String datasetDescription;
 	private Date created_at;
+	private String tenantId;
+	private Long version;
 	private List<Attribute> attributes;
 	private String wrapper;
 	@JsonIgnoreProperties({"datasets"})
@@ -89,4 +90,10 @@ public class Dataset {
 	public void setUUID(String UUID) {
 		this.UUID = UUID;
 	}
+
+	public String getTenantId() { return tenantId; }
+	public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+
+	public Long getVersion() { return version; }
+	public void setVersion(Long version) { this.version = version; }
 }

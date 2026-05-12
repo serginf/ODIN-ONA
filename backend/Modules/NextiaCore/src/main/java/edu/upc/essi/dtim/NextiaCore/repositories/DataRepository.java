@@ -8,6 +8,8 @@ public class DataRepository {
     private String repositoryName;
     private List<Dataset> datasets;
     private Boolean isVirtual;
+    private String tenantId;
+    private Long version;
 
     public String getId() {
         return id;
@@ -47,4 +49,10 @@ public class DataRepository {
     public void setVirtual(final Boolean virtual) {
         this.isVirtual = virtual;
     }
+
+    public String getTenantId() { return tenantId; }
+    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

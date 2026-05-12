@@ -8,8 +8,7 @@ import edu.upc.essi.dtim.NextiaCore.graph.jena.WorkflowGraphJenaImpl;
 import edu.upc.essi.dtim.odin.OdinApplication;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.NextiaGraphy.nextiaGraphyModuleImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.NextiaGraphy.nextiaGraphyModuleInterface;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
+import edu.upc.essi.dtim.odin.storage.GraphRepository;
 import edu.upc.essi.dtim.odin.config.AppConfig;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDI.integrationModuleImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDI.integrationModuleInterface;
@@ -34,11 +33,13 @@ import org.apache.jena.query.*;
 public class GraphStoreJenaImpl implements GraphStoreInterface {
     private static final Logger logger = LoggerFactory.getLogger(OdinApplication.class);
     private final Dataset dataset;
+    private final GraphRepository graphRepository;
 
-    public GraphStoreJenaImpl(@Autowired AppConfig appConfig) {
+    public GraphStoreJenaImpl(@Autowired AppConfig appConfig, @Autowired GraphRepository graphRepository) {
         String directory = appConfig.getJenaPath();
         new File(directory).mkdirs(); // Create the directory to store the graphs (if it is necessary)
         dataset = TDBFactory.createDataset(directory);
+        this.graphRepository = graphRepository;
     }
 
     /**
@@ -83,12 +84,11 @@ public class GraphStoreJenaImpl implements GraphStoreInterface {
     public Graph getGraph(String graphName) {
         Graph graph;
         // Check what type of graph it is to build the interface
-        ORMStoreInterface ormInterface = ORMStoreFactory.getInstance();
-        if (ormInterface.findById(LocalGraphJenaImpl.class, graphName) != null) {
+        if (graphRepository.findLocalGraph(graphName) != null) {
             graph = CoreGraphFactory.createLocalGraph();
-        } else if (ormInterface.findById(IntegratedGraphJenaImpl.class, graphName) != null) {
+        } else if (graphRepository.findIntegratedGraph(graphName) != null) {
             graph = CoreGraphFactory.createIntegratedGraph();
-        } else if (ormInterface.findById(WorkflowGraphJenaImpl.class, graphName) != null) {
+        } else if (graphRepository.findWorkflowGraph(graphName) != null) {
             graph = CoreGraphFactory.createWorkflowGraph();
         } else {
             graph = CoreGraphFactory.createGraphInstance("normal");

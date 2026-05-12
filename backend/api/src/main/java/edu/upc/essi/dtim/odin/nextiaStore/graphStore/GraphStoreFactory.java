@@ -17,40 +17,14 @@ public class GraphStoreFactory {
     private static final Logger logger = LoggerFactory.getLogger(GraphStoreFactory.class);
     private static GraphStoreInterface instance = null;
 
-    /**
-     * Private constructor prevents instantiation from outside the class.
-     */
-    private GraphStoreFactory() {
-        // Private constructor prevents instantiation from outside the class
+    public GraphStoreFactory(GraphStoreJenaImpl jenaImpl) {
+        instance = jenaImpl;
+        logger.info("GraphStoreFactory initialised with Spring-managed GraphStoreJenaImpl");
     }
 
-    /**
-     * Get an instance of {@link GraphStoreInterface} based on the specified database type
-     * and configuration.
-     *
-     * @param appConfig The application configuration containing database type information.
-     * @return An instance of {@link GraphStoreInterface} corresponding to the specified database type.
-     * @throws RuntimeException If there is an error creating the instance or if the database type is not recognized.
-     */
-    public static GraphStoreInterface getInstance(AppConfig appConfig){
-        if (appConfig == null) {
-            throw new IllegalArgumentException("appConfig cannot be null");
-        }
-
-        String dbType = appConfig.getDBTypeProperty();
+    public static GraphStoreInterface getInstance(AppConfig appConfig) {
         if (instance == null) {
-            logger.info("Creating a new instance of GraphStoreFactory with DB type: {}", dbType);
-
-            switch (dbType) {
-                case "JENA":
-                    instance = new GraphStoreJenaImpl(appConfig);
-                    break;
-                case "NEO4J":
-                    // Add other implementations here.
-                    break;
-                default:
-                    throw new RuntimeException("Error with DB type: " + dbType);
-            }
+            throw new IllegalStateException("GraphStoreFactory not yet initialised by Spring");
         }
         return instance;
     }

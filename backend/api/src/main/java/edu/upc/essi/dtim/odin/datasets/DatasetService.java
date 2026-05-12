@@ -16,8 +16,7 @@ import edu.upc.essi.dtim.odin.nextiaInterfaces.NextiaGraphy.nextiaGraphyModuleIm
 import edu.upc.essi.dtim.odin.nextiaInterfaces.NextiaGraphy.nextiaGraphyModuleInterface;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreFactory;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreInterface;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
+import edu.upc.essi.dtim.odin.storage.DatasetRepository;
 import edu.upc.essi.dtim.odin.config.AppConfig;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaBS.bsModuleImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaBS.bsModuleInterface;
@@ -63,7 +62,8 @@ public class DatasetService {
     private AppConfig appConfig;
     @Autowired
     private RestTemplate restTemplate;
-    private final ORMStoreInterface ormDataResource = ORMStoreFactory.getInstance();
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     // ---------------- POST Operation
 
@@ -402,7 +402,7 @@ public class DatasetService {
      * @return The saved Dataset object.
      */
     public Dataset saveDataset(Dataset dataset) {
-        return ormDataResource.save(dataset);
+        return datasetRepository.save(dataset);
     }
 
     /**
@@ -413,7 +413,7 @@ public class DatasetService {
      */
     public Dataset getDataset(String datasetID) {
         // Retrieve the dataset by its unique identifier
-        Dataset dataset = ormDataResource.findById(Dataset.class, datasetID);
+        Dataset dataset = datasetRepository.findById(datasetID).orElse(null);
         if (dataset == null) {
             throw new ElementNotFoundException("Dataset not found with ID: " + datasetID);
         }

@@ -1,8 +1,6 @@
 package edu.upc.essi.dtim.odin.query;
 
 import edu.upc.essi.dtim.NextiaCore.queries.Query;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaQR.qrModuleImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaQR.qrModuleInterface;
@@ -17,8 +15,6 @@ import org.springframework.stereotype.Service;
 public class QueryService {
     @Autowired
     private ProjectService projectService;
-    private final ORMStoreInterface ormDataResource = ORMStoreFactory.getInstance();
-
     // TODO: Description
     // TODO: Remake when all the pipeline is clear
     public QueryResult getQueryResult(QueryDataSelection body, String projectId) {
@@ -27,19 +23,14 @@ public class QueryService {
         return qrInterface.makeQuery(project.getIntegratedGraph(), project.getIntegratedDatasets(), body);
     }
 
-    // TODO: Description
+    // TODO: Query entity has no JPA mapping — persistence not implemented
     public Query getQueryByID(String queryID) {
-        // Retrieve the query by its unique identifier
-        Query query = ormDataResource.findById(Query.class, queryID);
-        if (query == null) {
-            throw new ElementNotFoundException("Query not found with ID: " + queryID);
-        }
-        return query;
+        throw new UnsupportedOperationException("Query persistence not yet implemented");
     }
 
-    // TODO: Description
+    // TODO: Query entity has no JPA mapping — persistence not implemented
     public void saveQuery(Query query) {
-        ormDataResource.save(query);
+        throw new UnsupportedOperationException("Query persistence not yet implemented");
     }
 
 

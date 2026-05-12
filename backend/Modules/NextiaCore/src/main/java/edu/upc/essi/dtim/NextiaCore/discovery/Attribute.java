@@ -11,6 +11,8 @@ public class Attribute {
 	Collection<Alignment> alignment;
 	private String name;
 	private String type;
+	private String tenantId;
+	private Long version;
 
 	public Attribute() {}
 
@@ -46,4 +48,10 @@ public class Attribute {
 	public void setType(String type) {
 		this.type = type;
 	}
+
+	public String getTenantId() { return tenantId; }
+	public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+
+	public Long getVersion() { return version; }
+	public void setVersion(Long version) { this.version = version; }
 }

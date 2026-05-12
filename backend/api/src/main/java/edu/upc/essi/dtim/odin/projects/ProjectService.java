@@ -9,8 +9,7 @@ import edu.upc.essi.dtim.NextiaCore.graph.jena.IntegratedGraphJenaImpl;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreFactory;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreInterface;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreJenaImpl;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
+import edu.upc.essi.dtim.odin.storage.ProjectRepository;
 import edu.upc.essi.dtim.odin.config.AppConfig;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerImpl;
@@ -31,9 +30,10 @@ import java.util.List;
 
 @Service
 public class ProjectService {
-    ORMStoreInterface ormProject = ORMStoreFactory.getInstance();
     @Autowired
-    private  AppConfig appConfig;
+    private ProjectRepository projectRepository;
+    @Autowired
+    private AppConfig appConfig;
 
     // ---------------- CRUD/ORM operations
 
@@ -46,7 +46,7 @@ public class ProjectService {
     public Project saveProject(Project project) {
         // For some reason, ormProject.save(project) does not store the global graph of the integrated graphs, so if we
         // want to obtain it, we need to execute the function getProject(), which regenerates the global graphs
-        Project savedProject = ormProject.save(project); // Save the project using the ORM store
+        Project savedProject = projectRepository.save(project); // Save the project using the ORM store
 
         // Check if the project has an integrated and/or temporal integrated graph. If that is the case, set the name
         // of the RDF file (the number) as the project's graph name, so we can access it later.
@@ -84,7 +84,7 @@ public class ProjectService {
      */
     public Project getProject(String projectId) {
         // Retrieve the project with the specified ID from the ORM store
-        Project project = ormProject.findById(Project.class, projectId);
+        Project project = projectRepository.findById(projectId).orElse(null);
         if (project == null) {
             throw new ElementNotFoundException("Project not found with ID: " + projectId);
         }
@@ -126,7 +126,7 @@ public class ProjectService {
     public List<Project> getAllProjects() {
         // We do not need all the data that is gathered in the getProject function, as we only want to show the name
         // of the project. Once a user selects a project, then all the information about graphs and so is gathered
-        return ormProject.getAll(Project.class);
+        return projectRepository.findAll();
     }
 
     /**
@@ -151,7 +151,7 @@ public class ProjectService {
      * @param id The ID of the project to delete.
      */
     public void deleteProject(String id) {
-        Project p = ormProject.findById(Project.class, id);
+        Project p = projectRepository.findById(id).orElse(null);
         for (DataRepository dr: p.getRepositories()) {
             for (Dataset d: dr.getDatasets()) {
                 // Delete rdf file (\jenaFiles)
@@ -164,7 +164,7 @@ public class ProjectService {
                 // so no need to do that manually
             }
         }
-        ormProject.deleteOne(Project.class, id);
+        projectRepository.delete(id);
     }
 
     // ---------------- Other operations

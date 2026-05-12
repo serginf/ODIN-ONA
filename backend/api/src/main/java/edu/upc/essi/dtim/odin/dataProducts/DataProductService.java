@@ -3,9 +3,8 @@ package edu.upc.essi.dtim.odin.dataProducts;
 import edu.upc.essi.dtim.NextiaCore.discovery.Attribute;
 import edu.upc.essi.dtim.NextiaCore.queries.DataProduct;
 import edu.upc.essi.dtim.NextiaCore.queries.Intent;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
 import edu.upc.essi.dtim.odin.config.AppConfig;
+import edu.upc.essi.dtim.odin.storage.DataProductRepository;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerImpl;
 import edu.upc.essi.dtim.odin.nextiaInterfaces.nextiaDataLayer.DataLayerInterface;
@@ -26,7 +25,8 @@ import java.util.Objects;
 
 @Service
 public class DataProductService {
-    private final ORMStoreInterface ormDataResource = ORMStoreFactory.getInstance();
+    @Autowired
+    private DataProductRepository dataProductRepository;
     @Autowired
     private AppConfig appConfig;
     @Autowired
@@ -41,7 +41,7 @@ public class DataProductService {
      * @return The saved DataProduct object.
      */
     public DataProduct saveDataProduct(DataProduct dataProduct) {
-        return ormDataResource.save(dataProduct);
+        return dataProductRepository.save(dataProduct);
     }
 
     /**
@@ -51,7 +51,7 @@ public class DataProductService {
      * @return The data product object.
      */
     public DataProduct getDataProduct(String dataProductID) {
-        DataProduct dataProduct = ormDataResource.findById(DataProduct.class, dataProductID);
+        DataProduct dataProduct = dataProductRepository.findById(dataProductID).orElse(null);
         if (dataProduct == null) {
             throw new ElementNotFoundException("Data product not found with ID: " + dataProductID);
         }
@@ -160,7 +160,7 @@ public class DataProductService {
      * @return If the task was successful returns a path were the materialized file resides
      */
     public String materializeDataProduct(String dataProductID) {
-        DataProduct dp = ormDataResource.findById(DataProduct.class, dataProductID);
+        DataProduct dp = dataProductRepository.findById(dataProductID).orElse(null);
         DataLayerInterface dataLayerInterFace = new DataLayerImpl(appConfig);
         return dataLayerInterFace.materialize(dp.getUUID(), "exp", "csv");
     }

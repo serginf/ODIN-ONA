@@ -7,9 +7,8 @@ import edu.upc.essi.dtim.NextiaCore.repositories.RelationalJDBCRepository;
 import edu.upc.essi.dtim.NextiaCore.datasets.Dataset;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreFactory;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreInterface;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
 import edu.upc.essi.dtim.odin.config.AppConfig;
+import edu.upc.essi.dtim.odin.storage.DataRepositoryRepository;
 import edu.upc.essi.dtim.odin.exception.CustomIOException;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.exception.FormatNotAcceptedException;
@@ -39,7 +38,8 @@ import java.util.jar.JarFile;
 
 @Service
 public class RepositoryService {
-    private final ORMStoreInterface ormDataResource = ORMStoreFactory.getInstance();
+    @Autowired
+    private DataRepositoryRepository dataRepositoryRepository;
     @Autowired
     private ProjectService projectService;
     @Autowired
@@ -52,7 +52,7 @@ public class RepositoryService {
      * @return The repository object.
      */
     public DataRepository getRepositoryById(String repositoryId) {
-        DataRepository dataRepository = ormDataResource.findById(DataRepository.class, repositoryId);
+        DataRepository dataRepository = dataRepositoryRepository.findById(repositoryId).orElse(null);
         if (dataRepository == null) {
             throw new IllegalArgumentException("Repository not found with repositoryId: " + repositoryId);
         }
@@ -160,7 +160,7 @@ public class RepositoryService {
      * @param repository Repository to be saved.
      */
     public void saveRepository(DataRepository repository) {
-        ormDataResource.save(repository);
+        dataRepositoryRepository.save(repository);
     }
 
     /**

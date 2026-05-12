@@ -39,6 +39,10 @@
             <basic name="createdBy">
                 <column name="CREATED_BY"/>
             </basic>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
 
             <one-to-many orphan-removal="true" name="repositories"
                          target-entity="edu.upc.essi.dtim.NextiaCore.repositories.DataRepository">
@@ -105,6 +109,10 @@
             <basic name="graphicalSchema">
                 <column name="GRAPHICALSCHEMA"/>
             </basic>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
             <transient name="graph"/>
         </attributes>
     </entity>
@@ -140,6 +148,10 @@
             </id>
             <basic name="repositoryName"/>
             <basic name="isVirtual"/>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
             <one-to-many name="datasets" orphan-removal="true"
                          target-entity="edu.upc.essi.dtim.NextiaCore.datasets.Dataset">
                 <cascade>
@@ -188,6 +200,10 @@
             </id>
             <basic name="name"/>
             <basic name="type"/>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
             <transient name="alignment"/>
         </attributes>
     </entity>
@@ -210,14 +226,16 @@
             </basic>
             <basic name="wrapper"/>
             <basic name="UUID"/>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
             <many-to-one name="repository"
                          target-entity="edu.upc.essi.dtim.NextiaCore.repositories.DataRepository">
             </many-to-one>
             <one-to-many name="attributes" orphan-removal="true"
                          target-entity="edu.upc.essi.dtim.NextiaCore.discovery.Attribute"/>
             <one-to-one name="localGraph" target-entity="edu.upc.essi.dtim.NextiaCore.graph.jena.LocalGraphJenaImpl">
-            <!-- Updated Sergi -->
-            <!-- <one-to-one name="localGraph" target-entity="edu.upc.essi.dtim.NextiaCore.graph.jena.GraphJenaImpl"> -->
                 <cascade>
                     <cascade-all/>
                 </cascade>
@@ -287,6 +305,10 @@
             </id>
             <basic name="intentName"/>
             <basic name="problem"/>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
             <many-to-one name="dataProduct"
                          target-entity="edu.upc.essi.dtim.NextiaCore.queries.DataProduct">
             </many-to-one>
@@ -305,6 +327,10 @@
                 <generated-value strategy="AUTO"/>
             </id>
             <basic name="workflowName"/>
+            <basic name="tenantId">
+                <column name="tenant_id"/>
+            </basic>
+            <version name="version"/>
             <one-to-one name="workflowGraph" target-entity="edu.upc.essi.dtim.NextiaCore.graph.jena.WorkflowGraphJenaImpl">
                 <cascade>
                     <cascade-all/>

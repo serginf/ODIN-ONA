@@ -9,6 +9,8 @@ public class Intent {
     DataProduct dataProduct;
     String problem;
     List<Workflow> workflows;
+    private String tenantId;
+    private Long version;
 
     public Intent() {}
 
@@ -38,4 +40,10 @@ public class Intent {
         }
         this.workflows.add(workflow);
     }
+
+    public String getTenantId() { return tenantId; }
+    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

@@ -8,9 +8,8 @@ import edu.upc.essi.dtim.NextiaCore.queries.Intent;
 import edu.upc.essi.dtim.NextiaCore.queries.Workflow;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreFactory;
 import edu.upc.essi.dtim.odin.nextiaStore.graphStore.GraphStoreInterface;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreFactory;
-import edu.upc.essi.dtim.odin.nextiaStore.relationalStore.ORMStoreInterface;
 import edu.upc.essi.dtim.odin.config.AppConfig;
+import edu.upc.essi.dtim.odin.storage.WorkflowRepository;
 import edu.upc.essi.dtim.odin.exception.ElementNotFoundException;
 import edu.upc.essi.dtim.odin.intents.IntentService;
 import edu.upc.essi.dtim.odin.workflows.pojos.WorkflowResponse;
@@ -33,7 +32,8 @@ public class WorkflowService {
     private IntentService intentService;
     @Autowired
     private AppConfig appConfig;
-    private final ORMStoreInterface ormDataResource = ORMStoreFactory.getInstance();
+    @Autowired
+    private WorkflowRepository workflowRepository;
 
     // ---------------- CRUD/ORM operations
 
@@ -44,7 +44,7 @@ public class WorkflowService {
      * @return The saved Workflow object.
      */
     public Workflow saveWorkflow(Workflow workflow) {
-        return ormDataResource.save(workflow);
+        return workflowRepository.save(workflow);
     }
 
     /**
@@ -54,7 +54,7 @@ public class WorkflowService {
      * @return The workflow object.
      */
     public Workflow getWorkflow(String workflowID) {
-        Workflow workflow = ormDataResource.findById(Workflow.class, workflowID);
+        Workflow workflow = workflowRepository.findById(workflowID).orElse(null);
         if (workflow == null) {
             throw new ElementNotFoundException("Workflow not found with ID: " + workflowID);
         }
